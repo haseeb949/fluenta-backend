@@ -16,6 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Tell Flask where models are
 ENV FLUENTA_MODELS_DIR=/app/models_retrained
 
+# Create models directory and make it writable for the non-root user (Hugging Face)
+RUN mkdir -p /app/models_retrained && chmod 777 /app/models_retrained
+
 
 # Expose the port Flask runs on
 EXPOSE 5000

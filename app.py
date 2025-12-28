@@ -778,24 +778,27 @@ def startup_load():
     global MODEL, SCALER, FEATURE_COUNT, MODELS_DIR, PREDICTIONS_LOG, SUBMISSIONS_LOG
     
     # Priority Strategy:
-    # 1. Environment Variable (Standard for Cloud)
-    # 2. Local relative directory (models_retrained)
-    # 3. Hardcoded D: drive (Only for Local Dev)
+    # 1. Environment Variable (Standard for Cloud/Hugging Face)
+    # 2. Local relative models_retrained (Dev/Fallback)
     
     env_dir = os.environ.get("FLUENTA_MODELS_DIR")
-    D_DRIVE_PATH = Path(r"D:/fluenta_fresh/backend/backend/models_retrained")
+    # In Hugging Face, app is at root /app, so models are at /app/models_retrained
     RELATIVE_PATH = SCRIPT_DIR / "models_retrained"
 
-    # Swap Priority: Prefer the project folder first, as that's where retraining happens
-    if RELATIVE_PATH.exists() and pick_existing_file(RELATIVE_PATH, PREFERRED_MODEL_FILENAMES):
-        MODELS_DIR = RELATIVE_PATH
-        logger.info("Using models from PROJECT RELATIVE path: %s", MODELS_DIR)
-    elif env_dir and Path(env_dir).exists():
+    if env_dir and Path(env_dir).exists():
         MODELS_DIR = Path(env_dir)
         logger.info("Using models from ENVIRONMENT variable: %s", MODELS_DIR)
-    elif D_DRIVE_PATH.exists() and pick_existing_file(D_DRIVE_PATH, PREFERRED_MODEL_FILENAMES):
-        MODELS_DIR = D_DRIVE_PATH
-        logger.info("Using models from hardcoded D: drive: %s", MODELS_DIR)
+    elif RELATIVE_PATH.exists() and pick_existing_file(RELATIVE_PATH, PREFERRED_MODEL_FILENAMES):
+        MODELS_DIR = RELATIVE_PATH
+        logger.info("Using models from PROJECT RELATIVE path: %s", MODELS_DIR)
+    else:
+        # Fallback for local testing if needed
+        D_DRIVE_PATH = Path(r"D:/fluenta_fresh/backend/backend/models_retrained")
+        if D_DRIVE_PATH.exists() and pick_existing_file(D_DRIVE_PATH, PREFERRED_MODEL_FILENAMES):
+             MODELS_DIR = D_DRIVE_PATH
+             logger.info("Using models from hardcoded D: drive: %s", MODELS_DIR)
+        else:
+             logger.warning("Could not find models directory!")
         
     logger.info("Final MODELS_DIR determined as: %s", MODELS_DIR)
 
