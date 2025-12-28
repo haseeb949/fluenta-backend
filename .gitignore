@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+Dataset/
+logs/
+uploads/
+**/uploads/
+.env
+*.zip
+models.zip
